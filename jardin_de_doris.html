@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2a0a16">
+<title>El Jardín de Doris</title>
+<style>
+:root{
+  --wine:#2a0a16; --wine2:#4a1226; --rose:#c2185b; --rose2:#e8567f;
+  --cream:#fbf1e3; --paper:#fff8ec; --ink:#3b1a22; --gold:#e0b25f;
+  --serif:'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --hand:'Segoe Script','Bradley Hand','Snell Roundhand','Comic Sans MS',cursive;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+html{background:#140409}
+body{
+  min-height:100vh;min-height:100dvh;color:var(--cream);font-family:var(--serif);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -5%,#6b1a38 0%,transparent 70%),
+    radial-gradient(ellipse 60% 40% at 90% 100%,#3a0d20 0%,transparent 70%),
+    linear-gradient(#2a0a16,#140409);
+  background-attachment:fixed;overflow-x:hidden;
+}
+#petals{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px 48px}
+
+/* ---------- encabezado con rosa que florece ---------- */
+#head{text-align:center;transition:opacity .5s,height .5s;}
+#head.off{display:none}
+.pr svg{width:112px;height:auto;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
+.pr .ring{transform-box:fill-box;transform-origin:center;transition:transform 1.1s cubic-bezier(.2,1.5,.4,1),opacity .8s}
+.pr .ring:not(.on){opacity:0;transform:scale(.25) rotate(-30deg)}
+.pr .bud{transition:opacity .8s}
+.pr.full svg{animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 22px rgba(255,120,160,.65))}}
+.chlabel{font-family:var(--hand);color:var(--gold);font-size:.95rem;margin-top:2px;min-height:1.4em}
+.bar{height:5px;border-radius:9px;background:rgba(255,255,255,.12);max-width:260px;margin:8px auto 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));border-radius:9px;transition:width .8s cubic-bezier(.3,1,.4,1)}
+.count{font-size:.78rem;opacity:.65;margin-top:5px;letter-spacing:.05em}
+
+/* ---------- tarjeta de papel ---------- */
+#stage{margin-top:14px;perspective:1200px}
+.card{
+  position:relative;background:
+    radial-gradient(circle at 15% 10%,rgba(255,255,255,.7),transparent 45%),
+    linear-gradient(170deg,#fffaf0,#f6e7d0);
+  color:var(--ink);border-radius:8px;padding:30px 22px 24px;
+  box-shadow:0 22px 50px rgba(0,0,0,.55),0 2px 0 rgba(255,255,255,.6) inset;
+  transform:rotate(-.5deg);animation:cardIn .7s cubic-bezier(.2,.9,.3,1) both;
+}
+.card::before,.card::after{content:"";position:absolute;top:-11px;width:84px;height:24px;background:rgba(224,178,95,.55);
+  box-shadow:0 1px 3px rgba(0,0,0,.2);transform:rotate(-4deg)}
+.card::before{left:18px}.card::after{right:18px;transform:rotate(5deg)}
+.card.out{animation:cardOut .35s ease-in both}
+@keyframes cardIn{from{opacity:0;transform:translateY(26px) rotate(1.6deg) scale(.97)}to{opacity:1;transform:rotate(-.5deg)}}
+@keyframes cardOut{to{opacity:0;transform:translateY(-18px) rotate(-2deg) scale(.97)}}
+.eyebrow{font-family:var(--hand);color:#a3364f;font-size:.92rem;margin:0 0 6px}
+h1,h2{font-weight:400;font-style:italic;margin:0;line-height:1.18;color:#4a1226}
+h1{font-size:2.15rem;text-align:center}
+h2{font-size:1.5rem}
+.hint{font-family:var(--hand);font-size:.9rem;color:#7d4a55;margin:10px 0 16px;line-height:1.5}
+p{line-height:1.6}
+.lead{font-size:1.05rem;margin:14px 0}
+.center{text-align:center}
+
+/* ---------- opciones ---------- */
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.opt{
+  display:flex;align-items:center;gap:9px;text-align:left;font:inherit;font-size:.95rem;color:var(--ink);
+  padding:11px 12px;border-radius:14px;border:1.5px solid rgba(122,40,62,.28);background:rgba(255,255,255,.6);
+  cursor:pointer;transition:transform .2s,background .2s,border-color .2s,box-shadow .2s;min-height:52px;
+}
+.opt .em{font-size:1.45rem;flex:none}
+.opt:hover{transform:translateY(-2px);border-color:var(--rose)}
+.opt.sel{background:linear-gradient(135deg,#c2185b,#9c1450);color:#fff;border-color:#7b0f3d;box-shadow:0 6px 16px rgba(194,24,91,.4);transform:scale(1.02)}
+.sws{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;font:inherit;color:var(--ink);cursor:pointer;padding:4px;border-radius:12px;transition:transform .2s}
+.sw i{display:block;width:50px;height:50px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.28),0 0 0 1.5px rgba(0,0,0,.12);transition:transform .25s,box-shadow .25s}
+.sw svg{width:58px;height:58px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));transition:transform .3s}
+.sw span{font-size:.76rem;line-height:1.15;text-align:center}
+.sw:hover i,.sw:hover svg{transform:scale(1.1) rotate(-4deg)}
+.sw.sel{background:rgba(194,24,91,.12);outline:2px solid var(--rose)}
+.sw.sel i{box-shadow:0 0 0 3px var(--rose),0 6px 14px rgba(0,0,0,.35);transform:scale(1.1)}
+.sw.sel svg{transform:scale(1.18) rotate(8deg)}
+.rose-sws{grid-template-columns:repeat(3,1fr)}
+.other{width:100%;margin-top:12px;font:inherit;font-size:.95rem;padding:11px 14px;border-radius:12px;border:1.5px dashed rgba(122,40,62,.4);background:rgba(255,255,255,.55);color:var(--ink);outline:none;transition:border .2s,background .2s}
+.other:focus,.txt:focus,.date:focus{border-color:var(--rose);background:#fff}
+.txt{width:100%;min-height:128px;resize:vertical;font:inherit;font-size:1.02rem;line-height:28px;color:var(--ink);padding:6px 14px;border:1.5px solid rgba(122,40,62,.3);border-radius:10px;outline:none;
+  background:repeating-linear-gradient(transparent 0 27px,rgba(194,24,91,.18) 27px 28px),#fffdf7;background-attachment:local}
+.date{font:inherit;font-size:1.15rem;padding:13px 16px;border-radius:12px;border:1.5px solid rgba(122,40,62,.3);background:#fffdf7;color:var(--ink);width:100%;outline:none}
+.slider-wrap{padding:10px 4px 0}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:9px;background:linear-gradient(90deg,#f4b6c8,#c2185b);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c2185b' d='M12 21s-7-4.6-9.3-9.1C1 8.5 3 5 6.4 5c2 0 3.5 1.1 4.3 2.5h2.6C14.1 6.1 15.6 5 17.6 5 21 5 23 8.5 21.3 11.9 19 16.4 12 21 12 21z'/%3E%3C/svg%3E") center/20px no-repeat;border:2px solid var(--rose);box-shadow:0 3px 8px rgba(0,0,0,.3);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:#fff;border:2px solid var(--rose);cursor:pointer}
+.sl-val{text-align:center;font-family:var(--hand);color:#a3364f;margin-top:16px;min-height:2.6em;font-size:1.02rem}
+.sl-num{font-size:2.6rem;text-align:center;font-style:italic;color:#c2185b;line-height:1}
+
+/* reacción del jardinero */
+.react{min-height:0;margin-top:16px;font-family:var(--hand);font-size:.95rem;color:#8a2a47;background:rgba(224,178,95,.22);border-left:3px solid var(--gold);padding:0 12px;border-radius:0 10px 10px 0;max-height:0;opacity:0;overflow:hidden;transition:all .45s}
+.react.on{max-height:120px;opacity:1;padding:9px 12px}
+
+/* botones */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:22px}
+.btn{font:inherit;font-size:1.02rem;border:0;cursor:pointer;color:#fff;padding:13px 26px;border-radius:40px;
+  background:linear-gradient(135deg,#d81b60,#9c1450);box-shadow:0 8px 20px rgba(194,24,91,.45);transition:transform .2s,box-shadow .2s,opacity .3s}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 26px rgba(194,24,91,.55)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn.big{width:100%;margin-top:18px}
+.ghost{font:inherit;font-size:.88rem;background:none;border:0;color:#8a5563;cursor:pointer;padding:8px 4px;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px}
+.ghost:hover{color:var(--rose)}
+
+/* juramento */
+.hold-zone{display:flex;flex-direction:column;align-items:center;margin-top:8px}
+.hold{position:relative;width:132px;height:132px;border:0;background:none;padding:0;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hold svg.rg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.hold svg.rg circle{fill:none;stroke-width:5;stroke-linecap:round}
+.hold .rs{position:absolute;inset:18px;transition:transform .3s}
+.hold .rs svg{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.hold.pressing .rs{transform:scale(1.15) rotate(10deg)}
+.hold-t{font-family:var(--hand);font-size:.95rem;color:#a3364f;margin-top:8px;text-align:center}
+
+/* final */
+.bouquet{display:block;width:min(300px,80%);margin:4px auto 0;filter:drop-shadow(0 10px 14px rgba(0,0,0,.3));animation:sway 5s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes sway{50%{transform:rotate(1.6deg)}}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:14px 0}
+.chip{font-size:.82rem;background:rgba(194,24,91,.1);border:1px solid rgba(194,24,91,.25);border-radius:30px;padding:5px 11px;color:#6b1a38}
+.chip b{font-weight:600}
+.seal{width:74px;height:74px;margin:0 auto;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e0455f,#8d1230 70%);box-shadow:0 5px 12px rgba(0,0,0,.4),inset 0 -3px 6px rgba(0,0,0,.3);display:grid;place-items:center;color:#ffd6dd;font-size:1.9rem;font-style:italic;animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.1)}30%{transform:scale(1)}45%{transform:scale(1.07)}}
+.foot{text-align:center;font-size:.75rem;opacity:.45;margin-top:22px;font-family:var(--hand)}
+@media (max-width:380px){.opts{grid-template-columns:1fr}.sws{grid-template-columns:repeat(3,1fr)}h1{font-size:1.8rem}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<canvas id="petals"></canvas>
+<div id="app">
+  <div id="head" class="off">
+    <div class="pr" id="pr"></div>
+    <div class="chlabel" id="chlabel"></div>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="count" id="count"></div>
+  </div>
+  <div id="stage"></div>
+  <div class="foot">hecho a mano, con mucho cariño, para Doris 🌹</div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN: pega aquí la URL de tu Apps Script (termina en /exec).
+   Mientras esté vacía, la página funciona igual pero no envía nada.
+   ===================================================================== */
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwViIc7HyI5BOuwi50btS2pfHikBOToF3654x-vCfTn_il5XR3wKuDBJW25UJ2n-5BV/exec';
+
+/* ---------------- utilidades ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const SID = (() => { let s = lsGet('jd_sid'); if (!s) { s = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); lsSet('jd_sid', s); } return s; })();
+
+function send(o) {
+  o.sesion = SID;
+  o.fecha = new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' });
+  if (!ENDPOINT) { console.log('[envío simulado]', o); return; }
+  try {
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(o), keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+
+/* ---------------- rosas en SVG ---------------- */
+let uid = 0;
+function shade(hex, p) {
+  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const t = p < 0 ? 0 : 255, a = Math.abs(p);
+  r = Math.round((t - r) * a + r); g = Math.round((t - g) * a + g); b = Math.round((t - b) * a + b);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+const petalPath = (L, w) => `M0,0C${-w},${-L * .25} ${-w * 1.15},${-L * .82} 0,${-L}C${w * 1.15},${-L * .82} ${w},${-L * .25} 0,0Z`;
+const RINGS = [
+  { n: 9, L: 48, w: 22, rot: 0 }, { n: 8, L: 40, w: 19, rot: 12 }, { n: 7, L: 32, w: 16, rot: 25 },
+  { n: 6, L: 25, w: 13, rot: 8 }, { n: 5, L: 18, w: 10, rot: 30 }, { n: 4, L: 11, w: 6, rot: 0 }
+];
+/* devuelve {defs, g}: la cabeza de la rosa centrada en 0,0 */
+function roseParts(color, onFrom = 0) {
+  const id = 'rg' + (++uid); let defs = '', g = '';
+  RINGS.forEach((r, k) => {
+    const base = shade(color, -.5 - k * .04), mid = shade(color, -.08 - k * .06), tip = shade(color, .24 - k * .04);
+    defs += `<linearGradient id="${id}${k}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${base}"/><stop offset=".55" stop-color="${mid}"/><stop offset="1" stop-color="${tip}"/></linearGradient>`;
+    let ps = '';
+    for (let j = 0; j < r.n; j++) ps += `<path d="${petalPath(r.L, r.w)}" transform="rotate(${r.rot + j * 360 / r.n})" fill="url(#${id}${k})" stroke="${shade(color, -.6)}" stroke-opacity=".45" stroke-width=".6"/>`;
+    g += `<g class="ring${k >= onFrom ? ' on' : ''}" data-k="${k}">${ps}</g>`;
+  });
+  g += `<path d="M0,0m-2.6,0a2.6,2.6 0 1 1 2.6,2.6a5.2,5.2 0 1 1 -5.2,-5.6" fill="none" stroke="${shade(color, -.6)}" stroke-width=".9" stroke-linecap="round" opacity=".7"/>`;
+  return { defs, g };
+}
+const roseSVG = (color, cls = '') => { const p = roseParts(color); return `<svg viewBox="-54 -54 108 108" class="${cls}" aria-hidden="true"><defs>${p.defs}</defs>${p.g}</svg>`; };
+
+/* rosa del encabezado: tallo, hojas, capullo y pétalos que se abren con el progreso */
+function progressRose(color, rings) {
+  const p = roseParts(color, 6 - rings);
+  return `<svg viewBox="-62 -62 124 214" aria-hidden="true"><defs>${p.defs}</defs>
+    <path d="M0,38 C-5,70 6,104 0,146" fill="none" stroke="#2f6b3a" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M-1,92 C-26,88 -38,70 -40,58 C-22,56 -6,68 -1,92Z" fill="#3b8a49"/>
+    <path d="M2,116 C26,112 40,96 42,84 C24,82 8,94 2,116Z" fill="#2f7a3d"/>
+    <g class="bud"><circle r="14" fill="${shade(color, -.45)}"/></g>
+    <g transform="scale(.92)">${p.g}</g></svg>`;
+}
+
+/* ramo final con la cantidad y el color que ella eligió */
+function bouquetSVG(cols, n) {
+  const shown = Math.max(1, Math.min(n, 9));
+  const spots = [[150, 78], [100, 100], [200, 100], [70, 146], [130, 132], [170, 132], [230, 146], [108, 172], [192, 172]];
+  const order = shown === 1 ? [[150, 120]] : spots.slice(0, shown);
+  order.sort((a, b) => a[1] - b[1]);
+  let defs = '', stems = '', heads = '';
+  order.forEach((pt, i) => {
+    const col = cols[i % cols.length], p = roseParts(col); defs += p.defs;
+    stems += `<path d="M${pt[0]},${pt[1]} Q${(pt[0] + 150) / 2},${(pt[1] + 250) / 2} 150,250" stroke="#2f6b3a" stroke-width="3.4" fill="none" stroke-linecap="round"/>`;
+    const sc = shown === 1 ? .95 : .52;
+    heads += `<g transform="translate(${pt[0]},${pt[1]}) scale(${sc})">${p.g}</g>`;
+  });
+  const leaves = [[96, 152, -40], [204, 152, 40], [124, 118, -20], [178, 116, 20]].map(l => `<ellipse cx="${l[0]}" cy="${l[1]}" rx="16" ry="6.5" fill="#3b8a49" transform="rotate(${l[2]} ${l[0]} ${l[1]})"/>`).join('');
+  return `<svg viewBox="0 0 300 300" class="bouquet" aria-label="Tu ramo"><defs>${defs}</defs>${leaves}${stems}${heads}
+    <path d="M82,186 L218,186 L166,292 L134,292Z" fill="#d9b98a" stroke="#b8935f" stroke-width="1.5"/>
+    <path d="M82,186 L150,208 L218,186" fill="#ead3ad" stroke="#b8935f" stroke-width="1.2"/>
+    <path d="M150,212 l-20,-14 q-6,10 0,22z M150,212 l20,-14 q6,10 0,22z" fill="#c2185b"/><circle cx="150" cy="212" r="5.5" fill="#9c1450"/>
+    <path d="M148,216 q-10,28 -18,40 M152,216 q10,28 18,40" stroke="#c2185b" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+}
+
+/* ---------------- contenido ---------------- */
+const CH = [
+  { n: 'Semillitas', e: '🌱', s: 'Empecemos suave: lo básico, lo que yo debería saber (pero prefiero confirmarlo).' },
+  { n: 'Sabores', e: '🍽️', s: 'Aquí hablamos de comida. Sí: la parte más seria de toda la encuesta.' },
+  { n: 'Colores y flores', e: '🌹', s: 'El capítulo de las rosas. El jardinero está nervioso, no lo mires tanto.' },
+  { n: 'Tú y yo', e: '💞', s: 'Preguntas para conocerte mejor (y para tomar apuntes de cómo enamorarte todavía más).' },
+  { n: 'Cosas serias, pero con cariño', e: '🕯️', s: 'Última tanda: lo importante para cuidarte bien.' }
+];
+const COLORS = [['Rojo', '#d32f2f'], ['Rosado', '#f48fb1'], ['Fucsia', '#d81b60'], ['Naranja', '#fb8c00'], ['Amarillo', '#fdd835'], ['Verde', '#43a047'],
+  ['Turquesa', '#26c6da'], ['Celeste', '#64b5f6'], ['Azul', '#1e5bc6'], ['Lila', '#b39ddb'], ['Morado', '#7b1fa2'], ['Negro', '#222'], ['Blanco', '#f4f0ea'], ['Beige', '#d9bf9b'], ['Plateado', '#b8bec6'], ['Dorado', '#d4a537']];
+const ROSES = [['Rojas', '#c8102e'], ['Rosadas', '#f06292'], ['Blancas', '#f7f3ee'], ['Amarillas', '#f6c928'], ['Naranjas', '#ff7a2f'], ['Lilas', '#b388eb'], ['Azules', '#4a7bd8'], ['Negras', '#3a1b27'], ['Todas, no me hagas elegir', 'mix']];
+
+const MULTI = ['choice', 'swatch', 'rose', 'multi'];
+const maxOf = q => q.single ? 1 : (q.max || 3);
+const R = (map, def) => raw => { const v = raw.last || (raw.sel && raw.sel[0]); return (map && map[v]) || (typeof def === 'function' ? def(raw) : def) || ''; };
+
+const Q = [
+  { id: 'apodo', ch: 0, k: 'Apodos favoritos', type: 'multi', max: 5,
+    t: '¿Cómo te gusta más que te digan?', h: 'Marca los que quieras. El que más se repita en mi boca gana (el premio soy yo).',
+    opts: [['mi monguita', '🐵'], ['mi orejitas', '🐰'], ['mi brujita', '🧙‍♀️'], ['mi amor', '💖'], ['mi reina', '👑']], other: 'Otro apodo que te guste…',
+    rx: r => r.sel.includes('mi brujita') ? 'Brujita, claro: me hechizaste sin permiso y sin devolución 🔮' : r.sel.length >= 3 ? 'Tres o más… eres de las que no se deciden. Me encanta.' : 'Anotado en la libretita del jardinero 📝' },
+  { id: 'cumple', ch: 0, k: 'Cumpleaños', type: 'date',
+    t: '¿Cuándo es tu cumpleaños?', h: 'Confírmamelo para no equivocarme jamás (la fecha, no la edad: eso no se pregunta 🤐).',
+    rx: () => 'Ya está marcado en mi calendario con rojo gigante y tres signos de exclamación 📅' },
+  { id: 'comida', core: true, ch: 1, k: 'Comida favorita', type: 'choice',
+    t: '¿Cuál es tu comida favorita en el mundo mundial?', h: 'La de verdad, no la que dirías en una primera cita para quedar bien.',
+    opts: [['Ceviche', '🐟'], ['Lomo saltado', '🥩'], ['Pollo a la brasa', '🍗'], ['Pizza', '🍕'], ['Pasta', '🍝'], ['Hamburguesa', '🍔'], ['Chifa', '🥡'], ['Sushi', '🍣'], ['Anticuchos', '🍢']], other: 'Otra (cuéntame cuál)…',
+    rx: R({ 'Ceviche': 'Ceviche… mi billetera tiembla, pero mi corazón aplaude de pie 👏', 'Pizza': 'Pizza: la respuesta que nunca decepciona. Persona de confianza 🍕', 'Pollo a la brasa': 'Con papas y cremas, obvio. Ya sé qué pedir en la próxima 🍗', 'Sushi': 'Sushi, eh. Voy a tener que aprender a usar los palitos sin hacer el ridículo 🥢', 'Chifa': 'Chifa: la comida que reúne a las familias y a los enamorados 🥡' }, 'Anotado con letras de oro. Y con hambre 🤤') },
+  { id: 'nocome', ch: 1, k: 'Comida que jamás comería', type: 'text', opt: true,
+    t: '¿Qué comida JAMÁS te comerías?', h: 'Para no llevarte nunca a un lugar donde te toque ese plato (soy detallista, no suicida).',
+    ph: 'Ejemplo: nada de hígado, nada de…', rx: () => 'Guardado. Ese plato queda oficialmente exiliado de nuestro reino 🚫' },
+  { id: 'postre', core: true, ch: 1, k: 'Postre favorito', type: 'choice',
+    t: 'Ahora lo importante: ¿cuál es tu postre favorito?', h: 'Aquí se vale ser golosa. Es más: se aplaude.',
+    opts: [['Helado', '🍨'], ['Torta de chocolate', '🍫'], ['Suspiro a la limeña', '🍮'], ['Cheesecake', '🍰'], ['Tres leches', '🥛'], ['Galletas', '🍪'], ['Fruta con crema', '🍓'], ['No soy de dulces', '🙅‍♀️']], other: 'Otro postre…',
+    rx: R({ 'No soy de dulces': 'Increíble. Entonces el único dulce en tu vida seré yo (qué humilde) 😏', 'Helado': 'Helado: nunca falla, ni en verano ni en penas ni en alegrías 🍨', 'Torta de chocolate': 'Chocolate. Mujer sabia, mujer fuerte 🍫' }, 'Anotado. Ya estoy planeando ir a una pastelería "por casualidad" 🍰') },
+  { id: 'bebida', core: true, ch: 1, k: 'Bebida favorita', type: 'choice',
+    t: '¿Y para tomar? ¿Cuál es tu bebida favorita?', h: 'Sin juzgar. Bueno, un poquito, pero con amor.',
+    opts: [['Chicha morada', '🍇'], ['Café', '☕'], ['Té o matcha', '🍵'], ['Frappé', '🧋'], ['Jugo de fresa', '🍓'], ['Limonada frozen', '🍋'], ['Gaseosa', '🥤'], ['Agüita nomás', '💧']], other: 'Otra bebida…',
+    rx: R({ 'Agüita nomás': 'Agüita… eres la persona más fácil de invitar del planeta, cuidado, me acostumbro 💧', 'Café': 'Café: entonces tus mañanas necesitan un cómplice. Yo me ofrezco ☕' }, 'Anotado. Lo pediré por ti antes de que lo pidas 😎') },
+  { id: 'antojo', ch: 1, k: 'Antojo de medianoche', type: 'text', opt: true,
+    t: 'Son las 2 a.m. y te da un antojo. ¿De qué?', h: 'Para saber qué llevarte si algún día aparezco de sorpresa con una bolsita.',
+    ph: 'Mi antojo secreto es…', rx: () => 'Ahora sé qué comprar a deshoras. Gracias por la inteligencia de inteligencia 🕵️' },
+  { id: 'color', core: true, ch: 2, k: 'Color favorito', type: 'swatch',
+    t: '¿Cuál es tu color favorito?', h: 'Elige uno. Si te gustan varios, elige el que usarías en un día importante.',
+    opts: COLORS, other: 'Otro color (el que sea)…',
+    rx: r => r.last ? `${r.last}, entonces. Mi ropa, mis sorpresas y hasta mi cuarto van a ser un poquito ${r.last.toLowerCase()} 🎨` : 'Un color con nombre propio… qué misteriosa 🎨' },
+  { id: 'rosa', max: 4, core: true, ch: 2, k: 'Color de rosas favorito', type: 'rose',
+    t: 'Y ahora, la pregunta de las preguntas: ¿de qué color son tus rosas favoritas?', h: 'Mira bien. De esto depende el ramo de tu futuro 🌹',
+    opts: ROSES,
+    rx: R({ 'mix': 'Te gustan todas. Entonces voy a tener que comprar el jardín completo 🥲', 'Rojas': 'Rojas, las clásicas. Pasión pura. Mi corazón también late a ese color ❤️', 'Negras': 'Rosas negras… brujita confirmada. Lo sabía 🖤🧙‍♀️', 'Blancas': 'Blancas: elegancia y paz. Me gusta cómo piensas 🤍', 'Rosadas': 'Rosadas: ternura pura. Ya veo por qué me tienes derretido 🌸' }, 'Anotado. Ya vi el color y mi rosa de arriba se está cambiando solita 👀') },
+  { id: 'cuantas', single: true, core: true, ch: 2, k: 'Cantidad de rosas', type: 'choice',
+    t: '¿Cuántas rosas te harían saltar de emoción?', h: 'La cantidad también cuenta una historia.',
+    opts: [['1', '1️⃣', 'Una sola, la del detalle'], ['3', '3️⃣', 'Tres (dicen que significa "te amo")'], ['6', '6️⃣', 'Media docena'], ['12', '🌹', 'Una docena clásica'], ['24', '💐', 'Dos docenas, soy intensa'], ['cualquiera', '🥹', 'Las que me regales las amaré igual']],
+    rx: R({ 'cualquiera': 'Respuesta de reina humilde. Prometo que no me voy a aprovechar… mucho 🥹', '1': 'Una sola, pero con una carta que haga llorar. Entendido el reto 💌', '24': 'Dos docenas. El jardinero va a tener que trabajar horas extra 😅' }, 'Anotado. Ya empecé a contar mis monedas 🪙') },
+  { id: 'forma', core: true, ch: 2, k: 'Cómo prefiere recibir las flores', type: 'choice',
+    t: '¿Cómo te gustaría recibirlas?', h: 'El envoltorio también es parte de la sorpresa.',
+    opts: [['Ramo grande', '💐'], ['Una sola con carta', '💌'], ['Rosas eternas (no se marchitan)', '♾️'], ['En caja con chocolates', '🎁'], ['Rosas hechas a mano (papel)', '✂️'], ['Prefiero otra flor', '🌻']], other: 'Otra idea loca…',
+    rx: R({ 'Rosas eternas (no se marchitan)': 'Rosas eternas: como lo que siento. Qué poético y qué práctico 😌', 'Rosas hechas a mano (papel)': 'Hechas a mano… me gusta el reto. Prepárate para ver mis manualidades (y mis dedos pegados) ✂️' }, 'Perfecto. Ya tengo el plan armándose en mi cabeza 🧠') },
+  { id: 'flor', ch: 2, k: 'Otra flor favorita', type: 'choice',
+    t: 'Aparte de las rosas, ¿cuál es tu flor favorita?', h: 'Por si algún día quiero sorprenderte sin que sea "rosa de siempre".',
+    opts: [['Girasoles', '🌻'], ['Tulipanes', '🌷'], ['Margaritas', '🌼'], ['Lirios', '🪷'], ['Orquídeas', '🌸'], ['Lavanda', '🪻'], ['Gerberas', '🌺'], ['Ninguna más, solo rosas', '🌹']], other: 'Otra flor…',
+    rx: () => 'Registrado en el herbario del jardinero 🌿' },
+  { id: 'aroma', ch: 2, k: 'Aroma favorito', type: 'choice',
+    t: '¿A qué te gusta que huela todo?', h: 'Perfumes, velas, cremas… Soy de los que prestan atención al olor de quien aman.',
+    opts: [['Vainilla', '🍦'], ['Floral', '🌸'], ['Frutal', '🍑'], ['Caramelo / dulce', '🍬'], ['Fresco y limpio', '🌊'], ['Madera / ámbar', '🪵'], ['Coco / tropical', '🥥']], other: 'Otro aroma…',
+    rx: () => 'Anotado. Voy a ser el experto en regalos con buen olor 👃' },
+  { id: 'amor', ch: 3, k: 'Lenguaje del amor', type: 'multi', max: 2,
+    t: '¿Cómo sientes que te quieren más?', h: 'Elige hasta dos. Así sé por dónde empezar a conquistarte cada día.',
+    opts: [['Palabras bonitas', '💌'], ['Tiempo juntos', '⏳'], ['Regalos y detalles', '🎁'], ['Que me ayuden y me cuiden', '🛠️'], ['Abrazos y mimos', '🤗']],
+    rx: r => r.sel.includes('Palabras bonitas') ? 'Palabras bonitas: perfecto, para eso tengo un diccionario enorme y un corazón desordenado 📖' : 'Anotado en la parte más importante del manual de Doris 📘' },
+  { id: 'cita', ch: 3, k: 'Cita ideal', type: 'choice',
+    t: 'Cita perfecta. Sin presupuesto, sin límites. ¿Cuál es?', h: 'Después veremos qué tan realistas somos (pero sueña).',
+    opts: [['Cine en casa con mantita', '🎬'], ['Picnic bajo el sol', '🧺'], ['Comida rica en un lugar bonito', '🍷'], ['Caminata o aventura', '🥾'], ['Bailar toda la noche', '💃'], ['Café y conversar horas', '☕'], ['Parque de diversiones', '🎢']], other: 'Mi cita ideal es…',
+    rx: () => 'Ya la anoté en el cuaderno de misiones románticas 🗺️' },
+  { id: 'romantica', ch: 3, k: 'Romanticómetro (0-10)', type: 'slider',
+    t: 'Del 0 al 10, ¿qué tan romántica eres?', h: 'Mueve el corazón. La respuesta es secreta (salvo para mí).',
+    lab: ['Corazón de piedra 🪨', 'Casi un cactus 🌵', 'Sensible, pero lo disimulo', 'Romántica en secreto', 'Cursi solo a veces', 'Normalita con ratos cursis', 'Bastante cursi', 'Cursi nivel telenovela 📺', 'Romántica de las de verdad', 'Película de Disney 🏰', 'Violines, fuegos artificiales y poesía 🎻'],
+    rx: r => r.num >= 8 ? 'Entonces nos entendemos perfecto. Prepárate para mucha cursilería 💘' : r.num <= 3 ? 'Perfecto, yo me encargo de ser lo bastante cursi por los dos 😌' : 'Equilibrio perfecto. Me gusta ese ritmo ✨' },
+  { id: 'cancion', ch: 3, k: 'Canción o artista del momento', type: 'text', opt: true,
+    t: '¿Qué canción (o artista) te hace sonreír sola?', h: 'Esa que pones cuando nadie te mira. Prometo no usarla en tu contra.',
+    ph: 'Mi canción es…', rx: () => 'Ya la estoy escuchando mentalmente. Y ya sé qué lista armarte 🎧' },
+  { id: 'peli', ch: 3, k: 'Peli o serie favorita', type: 'text', opt: true,
+    t: '¿Qué peli o serie podrías ver mil veces sin cansarte?', h: 'Así sé qué poner en la próxima noche de mantita.',
+    ph: 'Podría verla toda la vida…', rx: () => 'Anotada. Me la voy a aprender de memoria para impresionarte 🎬' },
+  { id: 'regalo', ch: 3, k: 'Regalo sorpresa ideal', type: 'text', opt: true,
+    t: 'Si te hiciera un regalo sorpresa, ¿cuál te haría saltar de emoción?', h: 'Puede ser pequeño, grande, raro o carísimo. Yo solo quiero saber qué te haría feliz.',
+    ph: 'Me haría muy feliz…', rx: () => 'Esta respuesta la voy a guardar bajo siete llaves 🗝️' },
+  { id: 'alergia', core: true, ch: 4, k: 'Alergias', type: 'text', opt: true,
+    t: '¿Eres alérgica a algo?', h: 'Flores, comidas, perfumes, polvo, gatos… Quiero regalarte rosas, no una visita a emergencias.',
+    ph: 'Alergias o cosas que me caen mal… (si no tienes, escribe "ninguna")', rx: () => 'Importantísimo. Gracias por contármelo, de verdad 🛡️' },
+  { id: 'molesta', ch: 4, k: 'Lo que le molesta', type: 'text', opt: true,
+    t: '¿Qué cosa te molesta tanto que debería evitarla para siempre?', h: 'Prefiero saberlo ahora que descubrirlo con tu ceño fruncido.',
+    ph: 'Me molesta mucho cuando…', rx: () => 'Anotado en rojo. Ahora tengo una lista de "cosas que NO hacer" 📛' },
+  { id: 'sueno', ch: 4, k: 'Un sueño suyo', type: 'text', opt: true,
+    t: 'Cuéntame un sueño tuyo, de esos que casi no cuentas.', h: 'De tu carrera, de viajes, de vida… Prometo no reírme (solo emocionarme).',
+    ph: 'Me encantaría algún día…', rx: () => 'Gracias por confiarme eso. Lo voy a cuidar como lo que es: algo precioso 🌟' }
+];
+const TOTAL = Q.length;
+
+/* ---------------- estado ---------------- */
+let S = { view: { t: 'intro' }, raw: {}, ans: {}, roseColor: '#c8102e', roseColors: ['#c8102e'] };
+try { const sv = JSON.parse(lsGet('jd_state') || 'null'); if (sv && sv.view) S = Object.assign(S, sv); } catch (e) {}
+const save = () => lsSet('jd_state', JSON.stringify(S));
+const done = () => Object.keys(S.ans).length;
+const qOf = i => Q[i];
+
+/* ---------------- encabezado ---------------- */
+function setHead(show, chIdx) {
+  const h = $('#head'); h.classList.toggle('off', !show);
+  if (!show) return;
+  const rings = Math.min(6, Math.floor(done() / TOTAL * 6.99));
+  const full = done() >= TOTAL;
+  const pr = $('#pr'); pr.className = 'pr' + (full ? ' full' : '');
+  /* el className se reasigna, pero el contenido SVG se conserva para que las transiciones sigan */
+  if (pr.dataset.color !== S.roseColor) { pr.innerHTML = progressRose(S.roseColor, rings); pr.dataset.color = S.roseColor; }
+  else requestAnimationFrame(() => requestAnimationFrame(() => {
+    pr.querySelectorAll('.ring').forEach(g => g.classList.toggle('on', +g.dataset.k >= 6 - rings)); }));
+  $('#chlabel').textContent = chIdx != null ? `${CH[chIdx].e} Capítulo ${chIdx + 1} · ${CH[chIdx].n}` : '';
+  $('#barfill').style.width = (done() / TOTAL * 100) + '%';
+  $('#count').textContent = `${done()} de ${TOTAL} semillas plantadas`;
+}
+
+/* ---------------- vistas ---------------- */
+const stage = $('#stage');
+function show(html, after) {
+  const old = stage.firstElementChild;
+  const put = () => { stage.innerHTML = html; window.scrollTo({ top: 0, behavior: 'smooth' }); after && after(); };
+  if (old) { old.classList.add('out'); setTimeout(put, 330); } else put();
+}
+
+function go(view) { S.view = view; save(); render(); }
+function render() {
+  const v = S.view;
+  if (v.t === 'intro') return viewIntro();
+  if (v.t === 'chap') return viewChap(v.c);
+  if (v.t === 'q') return viewQ(v.i);
+  if (v.t === 'final') return viewFinal();
+  if (v.t === 'end') return viewEnd();
+}
+
+/* --- intro con juramento --- */
+function viewIntro() {
+  setHead(false);
+  const back = done() > 0;
+  show(`<div class="card">
+    <p class="eyebrow center">una cartita con preguntas</p>
+    <h1>El Jardín de Doris</h1>
+    <p class="lead center">Un jardinero muy torpe, pero muy enamorado, necesita tu ayuda.</p>
+    <p>Quiero plantar todo lo que te hace feliz, pero no sé qué semillas comprar. Son unas preguntitas: sin exámenes, sin notas y <b>sin cachetadas</b> (la histórica ya la tuvimos 😌).</p>
+    <p>Responde con la verdad, no con lo que crees que quiero oír: si finges, me va a salir un jardín de puros cactus 🌵. Tienes <b>3 comodines 🃏</b> para saltarte las preguntas que no quieras contestar; las importantes sí hay que responderlas, ¡sin trampa!</p>
+    <p style="font-size:.9rem;opacity:.8">Tus respuestas me llegan a mí, y solo a mí. 🤍</p>
+    <div class="hold-zone">
+      <button class="hold" id="hold" aria-label="Mantén presionada la rosa para jurar sinceridad">
+        <svg class="rg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" stroke="rgba(122,40,62,.18)"/><circle id="hring" cx="50" cy="50" r="45" stroke="#c2185b" stroke-dasharray="282.7" stroke-dashoffset="282.7"/></svg>
+        <div class="rs">${roseSVG('#c8102e')}</div>
+      </button>
+      <div class="hold-t" id="holdt">${back ? 'Volviste 🥹 Mantén presionada la rosa para seguir donde quedaste' : 'Mantén presionada la rosa para jurar que responderás con la verdad'}</div>
+    </div></div>`, bindHold);
+}
+function bindHold() {
+  const b = $('#hold'), ring = $('#hring'), t = $('#holdt'); let raf = 0, t0 = 0, ok = false;
+  const DUR = 1100;
+  const step = n => { const p = Math.min(1, (n - t0) / DUR); ring.style.strokeDashoffset = 282.7 * (1 - p);
+    if (p >= 1) return swear(); raf = requestAnimationFrame(step); };
+  const start = e => { e.preventDefault(); if (ok) return; b.classList.add('pressing'); t0 = performance.now(); raf = requestAnimationFrame(step); };
+  const stop = () => { if (ok) return; cancelAnimationFrame(raf); b.classList.remove('pressing'); ring.style.strokeDashoffset = 282.7; };
+  function swear() { ok = true; try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} t.textContent = '¡Juramento sellado! 💖'; burst(40);
+    send({ tipo: 'evento', pregunta: 'Juramento', respuesta: 'Juró responder con la verdad' });
+    setTimeout(() => { const nx = firstPending(); go(nx); }, 700); }
+  b.addEventListener('pointerdown', start); ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+  b.addEventListener('contextmenu', e => e.preventDefault());
+  b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!ok) swear(); } });
+}
+function firstPending() {
+  const i = Q.findIndex(q => !(q.id in S.ans));
+  if (i < 0) return { t: 'final' };
+  return (i === 0 || Q[i].ch !== Q[i - 1].ch) && !S.seenCh?.includes(Q[i].ch) ? { t: 'chap', c: Q[i].ch } : { t: 'q', i };
+}
+
+/* --- portada de capítulo --- */
+function viewChap(c) {
+  S.seenCh = S.seenCh || []; if (!S.seenCh.includes(c)) S.seenCh.push(c); save();
+  setHead(true, c);
+  show(`<div class="card center">
+    <p class="eyebrow">Capítulo ${c + 1} de ${CH.length}</p>
+    <div style="font-size:3.2rem;margin:6px 0">${CH[c].e}</div>
+    <h2>${CH[c].n}</h2>
+    <p class="lead">${CH[c].s}</p>
+    <button class="btn big" data-act="start" data-c="${c}">Vamos 🌱</button></div>`);
+}
+
+/* --- pregunta --- */
+function viewQ(i) {
+  const q = qOf(i); const c = q.ch; setHead(true, c);
+  const raw = S.raw[q.id] || (S.raw[q.id] = { sel: [], other: '', text: '', num: 5, touched: false });
+  let body = '';
+  if (q.type === 'choice' || q.type === 'multi') {
+    body = `<div class="opts">${q.opts.map(o => `<button class="opt${raw.sel.includes(o[0]) ? ' sel' : ''}" data-v="${esc(o[0])}"><span class="em">${o[1]}</span><span>${esc(o[2] || o[0])}</span></button>`).join('')}</div>`;
+    if (q.other) body += `<input class="other" id="other" maxlength="80" placeholder="${esc(q.other)}" value="${esc(raw.other)}">`;
+  } else if (q.type === 'swatch') {
+    body = `<div class="sws">${q.opts.map(o => `<button class="sw${raw.sel.includes(o[0]) ? ' sel' : ''}" data-v="${esc(o[0])}"><i style="background:${o[1]}"></i><span>${o[0]}</span></button>`).join('')}</div>`
+      + `<input class="other" id="other" maxlength="60" placeholder="${esc(q.other)}" value="${esc(raw.other)}">`;
+  } else if (q.type === 'rose') {
+    body = `<div class="sws rose-sws">${q.opts.map(o => `<button class="sw${raw.sel.includes(o[0]) ? ' sel' : ''}" data-v="${esc(o[0])}">${o[1] === 'mix' ? '<svg viewBox="0 0 108 108">' + '<text x="54" y="72" font-size="56" text-anchor="middle">💐</text></svg>' : roseSVG(o[1])}<span>${o[0]}</span></button>`).join('')}</div>`;
+  } else if (q.type === 'text') {
+    body = `<textarea class="txt" id="txt" maxlength="500" placeholder="${esc(q.ph || '')}">${esc(raw.text)}</textarea>`;
+  } else if (q.type === 'date') {
+    body = `<input type="date" class="date" id="date" value="${esc(raw.text)}">`;
+  } else if (q.type === 'slider') {
+    body = `<div class="slider-wrap"><div class="sl-num" id="slnum">${raw.num}</div><input type="range" id="range" min="0" max="10" step="1" value="${raw.num}"><div class="sl-val" id="slval">${q.lab[raw.num]}</div></div>`;
+  }
+  const canBack = i > 0;
+  show(`<div class="card">
+    <p class="eyebrow">Pregunta ${i + 1} de ${TOTAL}</p>
+    <h2>${q.t}</h2><p class="hint">${q.h}${(MULTI.includes(q.type) && maxOf(q) > 1) ? ` <b>Puedes elegir hasta ${maxOf(q)}.</b>` : ''}</p>${body}
+    <div class="react" id="react"></div>
+    <div class="nav">
+      <button class="ghost" data-act="${canBack ? 'back' : 'none'}" ${canBack ? '' : 'style="visibility:hidden"'}>← Atrás</button>
+      <button class="btn" id="next" data-act="next" disabled>${i === TOTAL - 1 ? 'Terminar 🌹' : 'Siguiente'}</button>
+    </div>
+    ${(!q.core && skipsLeft() > 0) ? `<div class="center" style="margin-top:6px"><button class="ghost" data-act="skip">🃏 Usar un comodín (te quedan ${skipsLeft()})</button></div>` : (q.core ? '<div class="center hint" style="margin:10px 0 0">Esta es de las importantes, no vale comodín 😉</div>' : '')}</div>`,
+    () => { bindQ(q, i, raw); refresh(q, raw, false); });
+}
+const MAX_SKIPS = 3;
+const skipsLeft = () => MAX_SKIPS - Object.values(S.ans).filter(v => v === '(omitida)').length;
+const valid = (q, raw) => {
+  if (MULTI.includes(q.type)) return raw.sel.length > 0 || raw.other.trim().length > 0;
+  if (q.type === 'text') return raw.text.trim().length > 1;
+  if (q.type === 'date') return !!raw.text;
+  if (q.type === 'slider') return true;
+};
+function fmt(q, raw) {
+  const lab = v => { const o = (q.opts || []).find(x => x[0] === v); return o && o[2] ? o[2] : v; };
+  if (MULTI.includes(q.type)) return raw.sel.map(lab).concat(raw.other.trim() ? [raw.other.trim()] : []).join(', ');
+  if (q.type === 'text') return raw.text.trim() || '(sin respuesta)';
+  if (q.type === 'date') return raw.text;
+  if (q.type === 'slider') return `${raw.num}/10 – ${q.lab[raw.num]}`;
+}
+function refresh(q, raw, withReact) {
+  $('#next').disabled = !valid(q, raw);
+  const r = $('#react'); if (!r) return;
+  if (withReact && valid(q, raw) && !(q.type === 'text' && raw.text.trim().length < 3 && q.opt)) {
+    const msg = q.rx ? q.rx(raw) : ''; if (msg) { r.textContent = msg; r.classList.add('on'); }
+  } else if (!valid(q, raw)) r.classList.remove('on');
+}
+function bindQ(q, i, raw) {
+  const sync = () => { save(); refresh(q, raw, true); };
+  if (MULTI.includes(q.type)) {
+    document.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => {
+      const v = b.dataset.v, k = raw.sel.indexOf(v); let acc;
+      if (k >= 0) { raw.sel.splice(k, 1); acc = 'quitó'; raw.last = raw.sel[raw.sel.length - 1] || ''; }
+      else { if (raw.sel.length >= maxOf(q)) raw.sel.shift(); raw.sel.push(v); acc = 'eligió'; raw.last = v; }
+      document.querySelectorAll('[data-v]').forEach(x => x.classList.toggle('sel', raw.sel.includes(x.dataset.v)));
+      send({ tipo: 'clic', n: i + 1, pregunta: q.k, respuesta: acc + ': ' + v });
+      if (q.id === 'rosa') previewRose(raw.sel);
+      sync();
+    }));
+    const oi = $('#other'); if (oi) {
+      oi.addEventListener('input', () => { raw.other = oi.value; sync(); });
+      oi.addEventListener('change', () => { if (oi.value.trim()) send({ tipo: 'texto', n: i + 1, pregunta: q.k + ' (otra)', respuesta: oi.value.trim() }); });
+    }
+  } else if (q.type === 'text') {
+    const t = $('#txt'); let tm; t.addEventListener('change', () => { if (t.value.trim()) send({ tipo: 'texto', n: i + 1, pregunta: q.k, respuesta: t.value.trim() }); }); t.addEventListener('input', () => { raw.text = t.value; clearTimeout(tm); tm = setTimeout(sync, 500); save(); refresh(q, raw, false); });
+  } else if (q.type === 'date') {
+    const d = $('#date'); d.addEventListener('input', () => { raw.text = d.value; sync(); }); d.addEventListener('change', () => send({ tipo: 'clic', n: i + 1, pregunta: q.k, respuesta: 'fecha: ' + d.value }));
+  } else if (q.type === 'slider') {
+    const rg = $('#range'); raw.touched = false;
+    rg.addEventListener('input', () => { raw.num = +rg.value; raw.touched = true; $('#slnum').textContent = raw.num; $('#slval').textContent = q.lab[raw.num]; sync(); });
+    rg.addEventListener('change', () => send({ tipo: 'clic', n: i + 1, pregunta: q.k, respuesta: 'deslizó a ' + raw.num }));
+  }
+}
+function previewRose(sel) {
+  const PAL = ['#c8102e', '#f06292', '#f7f3ee', '#f6c928', '#ff7a2f', '#b388eb'];
+  let cols = sel.filter(n => n !== 'Todas, no me hagas elegir').map(n => (ROSES.find(r => r[0] === n) || [])[1]).filter(Boolean);
+  if (sel.includes('Todas, no me hagas elegir')) cols = PAL;
+  if (!cols.length) cols = ['#c8102e'];
+  S.roseColors = cols; S.roseColor = cols[0]; save();
+  setHead(true, 2);
+}
+
+/* --- avance --- */
+function nextAfter(i) {
+  const n = i + 1; if (n >= TOTAL) return { t: 'final' };
+  return Q[n].ch !== Q[i].ch ? { t: 'chap', c: Q[n].ch } : { t: 'q', i: n };
+}
+function commit(i, skipped) {
+  const q = qOf(i), raw = S.raw[q.id];
+  if (skipped && (q.core || (skipsLeft() <= 0 && S.ans[q.id] !== '(omitida)'))) return;
+  const val = skipped ? '(omitida)' : fmt(q, raw);
+  S.ans[q.id] = val; save();
+  send({ tipo: skipped ? 'saltada' : 'respuesta', n: i + 1, pregunta: q.k, respuesta: val });
+  setHead(true, q.ch);
+  if (!skipped) burst(7);
+  go(nextAfter(i));
+}
+
+/* --- final --- */
+function viewFinal() {
+  setHead(true, 4); $('#chlabel').textContent = '🌹 Tu jardín floreció';
+  const n = { '1': 1, '3': 3, '6': 6, '12': 12, '24': 24 }[(S.raw.cuantas && S.raw.cuantas.sel || [])[0]] || 7;
+  const cols = (S.roseColors && S.roseColors.length) ? S.roseColors : [S.roseColor];
+  const pick = [['comida', 'Comida'], ['postre', 'Postre'], ['bebida', 'Bebida'], ['color', 'Color'], ['rosa', 'Rosas'], ['flor', 'Otra flor'], ['cita', 'Cita']];
+  const chips = pick.filter(([k]) => S.ans[k] && S.ans[k] !== '(omitida)').map(([k, l]) => `<span class="chip"><b>${l}:</b> ${esc(S.ans[k])}</span>`).join('');
+  show(`<div class="card center">
+    <p class="eyebrow">el jardinero hizo su tarea</p>
+    <h2>Este es el ramo que sale de tus respuestas</h2>
+    ${bouquetSVG(cols, n)}
+    <div class="chips">${chips}</div>
+    <p class="hint" style="margin-top:4px">Ahora sí sé qué semillas comprar. Última cosa, y la más importante:</p>
+    <h2 style="font-size:1.2rem;margin-top:8px">¿Quieres decirme algo más?</h2>
+    <p class="hint" style="margin-top:6px">Lo que sea: una confesión, una queja, un “te quiero”, una indirecta gigante… Todo cabe aquí.</p>
+    <textarea class="txt" id="msg" maxlength="800" placeholder="Escribe aquí lo que quieras que sepa…"></textarea>
+    <div style="margin:20px 0 4px"><div class="seal">D</div></div>
+    <button class="btn big" id="sealbtn">Sellar con un beso 💋</button>
+    <div style="margin-top:8px"><button class="ghost" id="nomsg">Enviar sin mensaje</button></div></div>`, () => {
+      burst(30);
+      const fin = (m) => {
+        if (!S.sent) { S.sent = true; save();
+          send({ tipo: 'final', pregunta: 'Mensaje final', respuesta: m || '(sin mensaje)' });
+          send({ tipo: 'resumen', pregunta: 'Todas las respuestas', respuesta: JSON.stringify(S.ans) }); }
+        else if (m) send({ tipo: 'mensaje extra', pregunta: 'Mensaje adicional', respuesta: m });
+        go({ t: 'end' }); };
+      $('#sealbtn').onclick = () => { send({ tipo: 'clic', pregunta: 'Final', respuesta: 'botón Sellar con un beso' }); fin($('#msg').value.trim()); };
+      $('#nomsg').onclick = () => { send({ tipo: 'clic', pregunta: 'Final', respuesta: 'botón Enviar sin mensaje' }); fin(''); };
+    });
+}
+function viewEnd() {
+  setHead(false);
+  show(`<div class="card center">
+    <div class="seal" style="margin-bottom:14px">D</div>
+    <h2>Gracias, mi amor 🥹</h2>
+    <p class="lead">Ya tengo todas tus semillas guardadas. Ahora no me queda más que cuidarte, sorprenderte y regar este jardín todos los días.</p>
+    <p>Y si algún día me equivoco con una flor, ya sabes: puedes volver a darme una (suave) cachetadita 😌🌹</p>
+    <button class="btn big" data-act="review">Ver mi ramo otra vez 💐</button>
+    <p class="hint">Si algo cambia (porque tus gustos cambian, lo sé), puedes volver a entrar cuando quieras.</p></div>`, () => burst(80));
+}
+
+/* --- clicks globales --- */
+stage.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return; const act = b.dataset.act; const v = S.view;
+  if (act === 'start') go({ t: 'q', i: Q.findIndex(q => q.ch === +b.dataset.c) });
+  else if (act === 'next') commit(v.i, false);
+  else if (act === 'skip') { send({ tipo: 'clic', n: v.i + 1, pregunta: qOf(v.i).k, respuesta: 'usó un comodín' }); commit(v.i, true); }
+  else if (act === 'back') { send({ tipo: 'clic', n: v.i + 1, pregunta: qOf(v.i).k, respuesta: 'botón Atrás' }); const j = v.i - 1; go({ t: 'q', i: j }); }
+  else if (act === 'review') go({ t: 'final' });
+});
+
+/* ---------------- pétalos y luciérnagas ---------------- */
+const cv = $('#petals'), cx = cv.getContext('2d'); let W, H, DPR;
+function size() { DPR = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; cx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+addEventListener('resize', size); size();
+const PC = ['#c2185b', '#e8567f', '#f48fb1', '#8e1b3a', '#ff7f9f'];
+const mk = (top, fast) => ({ x: Math.random() * W, y: top ? -20 : Math.random() * H, s: 6 + Math.random() * 9, vy: (.25 + Math.random() * .6) * (fast || 1), vx: (Math.random() - .5) * .3, r: Math.random() * 6.28, vr: (Math.random() - .5) * .03, ph: Math.random() * 6.28, c: PC[Math.random() * PC.length | 0], a: .22 + Math.random() * .42 });
+let P = Array.from({ length: 24 }, () => mk(false));
+const F = Array.from({ length: 22 }, () => ({ x: Math.random() * W, y: Math.random() * H, r: .8 + Math.random() * 1.6, ph: Math.random() * 6.28, sp: .4 + Math.random() * .8 }));
+function burst(n) { for (let i = 0; i < n; i++) { const p = mk(true, 3 + Math.random() * 2); p.b = true; p.y = -20 - Math.random() * 200; p.a = .7; p.s = 7 + Math.random() * 10; P.push(p); } }
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(t) {
+  cx.clearRect(0, 0, W, H);
+  for (const f of F) {
+    const a = .25 + .55 * Math.abs(Math.sin(t / 1000 * f.sp + f.ph)); f.x += Math.sin(t / 3000 + f.ph) * .15; f.y += Math.cos(t / 2600 + f.ph) * .12;
+    cx.shadowBlur = 10; cx.shadowColor = 'rgba(255,200,100,.9)'; cx.fillStyle = `rgba(255,214,130,${a})`; cx.beginPath(); cx.arc(f.x, f.y, f.r, 0, 6.28); cx.fill();
+  }
+  cx.shadowBlur = 0;
+  P = P.filter(p => { p.y += p.vy; p.x += p.vx + Math.sin(t / 1200 + p.ph) * .35; p.r += p.vr; if (p.y > H + 24) { if (p.b) return false; Object.assign(p, mk(true)); } return true; });
+  for (const p of P) {
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.globalAlpha = p.a; cx.fillStyle = p.c; const s = p.s;
+    cx.beginPath(); cx.moveTo(0, -s); cx.bezierCurveTo(s * .9, -s * .6, s * .7, s * .6, 0, s); cx.bezierCurveTo(-s * .7, s * .6, -s * .9, -s * .6, 0, -s); cx.fill(); cx.restore();
+  }
+  if (!still) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------------- arranque ---------------- */
+if (!S.seenCh) S.seenCh = [];
+if (S.view.t === 'q' || S.view.t === 'chap') { /* continuar donde quedó, pero pasando por el juramento si es la primera vez */ }
+send({ tipo: 'evento', pregunta: 'Abrió la página', respuesta: done() ? `Retoma con ${done()} respuestas` : 'Primera vez' });
+if (S.view.t === 'end') { S.view = { t: 'final' }; }
+render();
+</script>
+</body>
+</html>
